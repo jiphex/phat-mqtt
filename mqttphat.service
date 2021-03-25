@@ -1,0 +1,9 @@
+[Unit]
+Description = "MQTT ePaper subscriber"
+After = "network.target"
+
+[Service]
+ExecStart=/home/pi/mqttphat/mqtt.py
+
+[Install]
+WantedBy=default.target

@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import time
 from inky import InkyPHAT
 from font_fredoka_one import FredokaOne
@@ -22,7 +23,6 @@ def update_state(status: str):
 def on_connect(client,userdata,flags,rc):
     print("connected")
     update_state("ALIVE")
-    client.will_set(client_topic(), payload="DEAD", qos=1, retain=True)
     client.subscribe("phat/image",1)
     client.subscribe(f"phat/image/{client_id()}",1)
     print("setup done")
@@ -71,6 +71,7 @@ if __name__ == '__main__':
     client.on_connect = on_connect
     client.on_log = debug_mqtt
     client.on_message = on_message
+    client.will_set(client_topic(), payload="DEAD", qos=1, retain=True)
     client.connect(broker,1883)
     client.loop_start()
     try:
