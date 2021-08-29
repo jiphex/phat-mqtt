@@ -4,6 +4,7 @@ After = "network.target"
 
 [Service]
 ExecStart=/home/pi/mqttphat/mqtt.py
+Restart=always
 
 [Install]
 WantedBy=default.target
