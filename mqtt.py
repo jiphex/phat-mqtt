@@ -61,16 +61,24 @@ class Displayer:
             logging.info("skipping same image update")
             return
         self.lasthash = data["hash"]
-        rqh = {"Accept": "image/*"}
+        rqh = {
+            "Accept": "image/*",
+            "If-None-Match": self.lasthash,
+        }
         resp = requests.get(data["url"], headers=rqh, stream=True)
-        rspct = resp.headers["Content-Type"]
-        if not rspct.startswith("image/"):
-            self.epaper_display_error(f"resp wasn't image, ignoring: {rspct}")
-        # logging.info(resp.headers)
-        img = Image.open(BytesIO(resp.content))
-        if img.size != (212, 104):
-            self.epaper_display_error("image size is incorrect!")
-        self.epaper_display_image(img)
+        if resp.status_code == 200:
+            rspct = resp.headers["Content-Type"]
+            if not rspct.startswith("image/"):
+                self.epaper_display_error(f"resp wasn't image, ignoring: {rspct}")
+            # logging.info(resp.headers)
+            img = Image.open(BytesIO(resp.content))
+            if img.size != (212, 104):
+                self.epaper_display_error("image size is incorrect!")
+            self.epaper_display_image(img)
+        elif resp.status_code == 304:
+            logging.warning("not updating image due to http 304")
+        else:
+            logging.error(f"unhandled response status: {resp.status_code}")
 
     def on_disconnect(self, client, userdata, rc):
         self.epaper_display_error(f"disconnected rc:{rc}")
